@@ -13,9 +13,9 @@ func Registration(w http.ResponseWriter, r *http.Request) {
 	db.NewRecord(req)
 	db.Create(&req)
 
-	req.AccessToken = helpers.GenerateAccess(req.Email, req.Password)
+	req.GenerateAccess(req.Email, req.Password)
 
-	req.RefreshToken = helpers.GenerateRefresh(req.Email, req.Password)
+	req.GenerateRefresh(req.Email, req.Password)
 
 	err := json.NewEncoder(w).Encode(req)
 	if err != nil {
@@ -27,9 +27,9 @@ func Login(w http.ResponseWriter, r *http.Request) {
 
 	isTrue := db.Where("email=?", req.Email).Where("password=?", req.Password)
 	if !isTrue.RecordNotFound() {
-		req.AccessToken = helpers.GenerateAccess(req.Email, req.Password)
+		req.GenerateAccess(req.Email, req.Password)
 
-		req.RefreshToken = helpers.GenerateRefresh(req.Email, req.Password)
+		req.GenerateRefresh(req.Email, req.Password)
 
 		json.NewEncoder(w).Encode(req)
 	}

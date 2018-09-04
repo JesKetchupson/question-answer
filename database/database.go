@@ -10,8 +10,28 @@ var db, err  = helpers.GetDb()
 func Migrate() {
 	if (!db.HasTable(User{})) {
 		db.AutoMigrate(User{})
-		println("migrated")
 	}
+	if (!db.HasTable(Question{})) {
+		db.AutoMigrate(Question{})
+	}
+	if (!db.HasTable(Object{})) {
+		db.AutoMigrate(Object{})
+
+	}
+	if (!db.HasTable(Question{})) {
+		db.AutoMigrate(User{})
+
+	}
+	if (!db.HasTable(Category{})) {
+		db.AutoMigrate(Category{})
+
+	}
+	if (!db.HasTable(Answer{})) {
+		db.AutoMigrate(Answer{})
+
+	}
+
+	println("migrated")
 }
 
 func Seed(){

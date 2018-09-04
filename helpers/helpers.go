@@ -35,33 +35,12 @@ func Decode(tokenString string) User {
 	}
 	return user
 }
-func GenerateRefresh(email string, password string) string {
 
-	signer := jwt.NewWithClaims(jwt.SigningMethodHS512, jwt.MapClaims{
-		"email":    email,
-		"password": password,
-		"iss":      "admin",
-		"exp":      time.Now().Add(time.Minute * 20).Unix(),
-	})
-
-	tokenString, err := signer.SignedString([]byte("b093be924f51ddfe2dcbd5eb69aa195b14dca0ad2325e9b3d56ded6c7c519e2c"))
-	println(tokenString, err)
-	return string(tokenString)
-}
-func GenerateAccess(email string, password string) string {
-	signer := jwt.NewWithClaims(jwt.SigningMethodHS512, jwt.MapClaims{
-		"email":    email,
-		"password": password,
-		"iss":      "admin",
-		"exp":      time.Now().Add(time.Minute * 20).Unix(),
-	})
-	tokenString, err := signer.SignedString([]byte("b093be924f51ddfe2dcbd5eb69aa195b14dca0ad2325e9b3d56ded6c7c519e2c"))
-
-	println(tokenString, err)
-	return string(tokenString)
-	}
 func GetDb() (*gorm.DB, error){
 	var db, err = gorm.Open("sqlite3", "database.db")
+	if err!= nil{
+		panic(err)
+	}
 	return db, err
 }
 /*
