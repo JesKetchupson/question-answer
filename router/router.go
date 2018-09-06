@@ -1,18 +1,20 @@
 package router
 
 import (
-	"github.com/gorilla/mux"
 	"awesomeProject/api/controllers"
 	"awesomeProject/api/middleware"
+	"github.com/gorilla/mux"
 	"net/http"
 )
 
-func Router() http.Handler{
+func Router() http.Handler {
 	router := mux.NewRouter()
 
 	router.HandleFunc("/registration", controllers.Registration).Methods("POST")
 
 	router.HandleFunc("/login", controllers.Login).Methods("POST")
+
+	router.HandleFunc("/graphql", controllers.GraphQl).Methods("GET")
 
 	//Read does not need protection
 	router.HandleFunc("/read", controllers.Read).Methods("GET")

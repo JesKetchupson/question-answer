@@ -1,12 +1,13 @@
 package database
 
 import (
-		"awesomeProject/api/helpers"
+	"awesomeProject/api/helpers"
 	. "awesomeProject/api/models"
 	"strconv"
 )
 
-var db, err  = helpers.GetDb()
+var db, err = helpers.GetDb()
+
 func Migrate() {
 	if (!db.HasTable(User{})) {
 		db.AutoMigrate(User{})
@@ -34,15 +35,27 @@ func Migrate() {
 	println("migrated")
 }
 
-func Seed(){
-	if (!db.HasTable(User{})) {
+func Seed() {
+	if (db.HasTable(User{})) {
 		for i := 1; i < 11; i++ {
 			seed := User{
 				Email:    "email" + strconv.Itoa(i),
 				Password: "pass" + strconv.Itoa(i),
 			}
 			db.Create(&seed)
+
 		}
+		seed2 := Object{
+			CategoryID: 1,
+			Name:       "asd",
+			Image:      "asd",
+		}
+		db.Create(&seed2)
+		seed3 := Question{
+			FirstObjectID:  uint(1),
+			SecondObjectID: uint(1),
+		}
+		db.Create(&seed3)
 	}
 
 }

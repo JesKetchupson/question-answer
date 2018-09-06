@@ -1,16 +1,14 @@
 package helpers
 
 import (
-	"github.com/dgrijalva/jwt-go"
-	"fmt"
 	. "awesomeProject/api/models"
-	"time"
+	"encoding/json"
+	"fmt"
+	"github.com/dgrijalva/jwt-go"
 	"github.com/jinzhu/gorm"
 	"net/http"
-	"encoding/json"
+	"time"
 )
-
-
 
 func Decode(tokenString string) User {
 	token, errparse := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
@@ -36,20 +34,21 @@ func Decode(tokenString string) User {
 	return user
 }
 
-func GetDb() (*gorm.DB, error){
+func GetDb() (*gorm.DB, error) {
 	var db, err = gorm.Open("sqlite3", "database.db")
-	if err!= nil{
+	if err != nil {
 		panic(err)
 	}
 	return db, err
 }
+
 /*
 * func deleteAfter()
 * Takes struct and int
 * Delete record according to struct after N second
-*/
+ */
 func DeleteAfter(req *User, seconds int) {
-	db,_ := GetDb()
+	db, _ := GetDb()
 	select {
 	case <-time.After(time.Second * time.Duration(seconds)):
 		db.Delete(&req)

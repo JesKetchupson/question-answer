@@ -1,9 +1,10 @@
 package middleware
 
 import (
-	"net/http"
 	"awesomeProject/api/helpers"
+	"net/http"
 )
+
 func MiddlewareAuth(h http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		//Conditions before
