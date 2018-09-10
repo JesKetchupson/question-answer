@@ -21,6 +21,8 @@ func main() {
 	//database.Migrate()
 	//database.Seed()
 	println("Server started on port 8080")
+
 	http.ListenAndServe(":8080", handlers.LoggingHandler(os.Stdout, router.Router()))
+
 	db.Close()
 }

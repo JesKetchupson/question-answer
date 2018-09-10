@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"github.com/graphql-go/graphql"
 	"net/http"
+	"github.com/gorilla/websocket"
 )
 
 var db, err = helpers.GetDb()
@@ -165,15 +166,13 @@ var queryType = graphql.NewObject(
 						cat := db.Find(&Category{ID: so.CategoryID}).Value.(*Category)
 						so.Category = *cat
 						ad.SecondObject = *so
-						a, _ := json.Marshal(ad)
-						fmt.Printf("%s", a)
 						return ad, nil
 					}
 					return nil, errors.New("not found")
 				},
 			},
 			/* Get (read) product list
-			   http://localhost:8080/product?query={list{id,name,info,price}}
+			   http://localhost:8080/graphql?query={list{id}}
 			*/
 			"list": &graphql.Field{
 				Type:        graphql.NewList(questionType),
@@ -343,6 +342,52 @@ func GraphQl(w http.ResponseWriter, r *http.Request) {
 	)
 	result := executeQuery(r.URL.Query().Get("query"), schema)
 	json.NewEncoder(w).Encode(result)
+}
+
+var upgrader = websocket.Upgrader{}
+
+// Not best temporary solution
+var ConChan []*websocket.Conn
+
+func GraphQlWs(w http.ResponseWriter, r *http.Request) {
+	conn, _ := upgrader.Upgrade(w, r, nil)
+	var schema, _ = graphql.NewSchema(
+		graphql.SchemaConfig{
+			Query:    queryType,
+			Mutation: mutationType,
+		},
+	)
+	check :=true
+	for _, z := range ConChan{
+		if  z == conn {
+			check = false
+		}
+	}
+	if check {
+		ConChan = append(ConChan, conn)
+	}
+
+	go func(conn *websocket.Conn) {
+		for {
+			Mt, p, err := conn.ReadMessage()
+			result := executeQuery(string(p), schema)
+			a, _ := json.Marshal(result)
+
+			if err != nil {
+				conn.Close()
+				return
+			}
+
+			for _, b := range ConChan {
+				b.WriteMessage(Mt, a)
+			}
+
+			if err != nil {
+				conn.Close()
+				return
+			}
+		}
+	}(conn)
 }
 
 func executeQuery(query string, schema graphql.Schema) *graphql.Result {

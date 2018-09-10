@@ -5,7 +5,7 @@ import (
 	"awesomeProject/api/middleware"
 	"github.com/gorilla/mux"
 	"net/http"
-)
+	)
 
 func Router() http.Handler {
 	router := mux.NewRouter()
@@ -24,6 +24,8 @@ func Router() http.Handler {
 	router.Handle("/update", middleware.MiddlewareAuth(controllers.Update)).Methods("PUT")
 
 	router.Handle("/delete", middleware.MiddlewareAuth(controllers.Del)).Methods("DELETE")
+
+	router.HandleFunc("/graphql/ws", controllers.GraphQlWs)
 
 	return router
 }
