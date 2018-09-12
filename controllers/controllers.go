@@ -17,7 +17,6 @@ func Registration(w http.ResponseWriter, r *http.Request) {
 	req := helpers.GetDecodedJson(r)
 	db.NewRecord(req)
 	db.Create(&req)
-
 	req.GenerateAccess(req.Email, req.Password)
 
 	req.GenerateRefresh(req.Email, req.Password)
@@ -181,6 +180,37 @@ var queryType = graphql.NewObject(
 					return questions, nil
 				},
 			},
+			"getRandomQuestion": &graphql.Field{
+				Type:        questionType,
+				Description: "Get random question for user",
+				Args: graphql.FieldConfigArgument{
+					"user_id": &graphql.ArgumentConfig{
+						Type: graphql.Int,
+					},
+				},
+				Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+					UserID, _ := p.Args["user_id"]
+					var Answers []Answer
+					db.Where("user_id=?", UserID).Find(&Answers)
+					var ListQuestions []Question
+					db.Find(&ListQuestions)
+					var i = 0
+
+					for _, QuestionA := range ListQuestions {
+						for _, Answer := range Answers {
+							if QuestionA.ID != Answer.QuestionID {
+								i++
+							}
+							if i == len(Answers) {
+								return QuestionA, nil
+							}
+						}
+						i = 0
+					}
+
+					return nil, nil
+				},
+			},
 		},
 	})
 
@@ -188,7 +218,7 @@ var mutationType = graphql.NewObject(graphql.ObjectConfig{
 	Name: "Mutation",
 	Fields: graphql.Fields{
 		/* Create new product item
-		http://localhost:8080/product?query=mutation+_{create(name:"Inca Kola",info:"Inca Kola is a soft drink that was created in Peru in 1935 by British immigrant Joseph Robinson Lindley using lemon verbena (wiki)",price:1.99){id,name,info,price}}
+		http://localhost:8080/product?query=mutation+_{create(name:"asd"){id,name,info,price}}
 		*/
 		"createCategory": &graphql.Field{
 			Type:        category,
@@ -277,6 +307,42 @@ var mutationType = graphql.NewObject(graphql.ObjectConfig{
 			},
 		},
 
+
+		"addAnswer": &graphql.Field{
+			Type:        object,
+			Description: "Add answer on User",
+			Args: graphql.FieldConfigArgument{
+				"user_id": &graphql.ArgumentConfig{
+					Type: graphql.Int,
+				},
+				"question_id": &graphql.ArgumentConfig{
+					Type: graphql.String,
+				},
+				"object_id": &graphql.ArgumentConfig{
+					Type: graphql.String,
+				},
+			},
+			Resolve: func(params graphql.ResolveParams) (interface{}, error) {
+				user, userOk := params.Args["user_id"]
+				questionID, questionOk := params.Args["question_id"]
+				objectID, objectOk := params.Args["object_id"]
+
+				NewAnswer := Answer{}
+				if userOk {
+					NewAnswer.UserID = uint(user.(int))
+				}
+				if questionOk {
+					NewAnswer.QuestionID = uint(questionID.(int))
+				}
+				if objectOk {
+					NewAnswer.ObjectID = uint(objectID.(int))
+				}
+				db.Create(&NewAnswer)
+				return NewAnswer, nil
+			},
+		},
+
+
 		/* Update product by id
 		   http://localhost:8080/product?query=mutation+_{update(id:1,price:3.95){id,name,info,price}}
 		*/
@@ -357,9 +423,9 @@ func GraphQlWs(w http.ResponseWriter, r *http.Request) {
 			Mutation: mutationType,
 		},
 	)
-	check :=true
-	for _, z := range ConChan{
-		if  z == conn {
+	check := true
+	for _, z := range ConChan {
+		if z == conn {
 			check = false
 		}
 	}
