@@ -14,7 +14,7 @@ func Router() http.Handler {
 
 	router.HandleFunc("/login", controllers.Login).Methods("POST")
 
-	router.HandleFunc("/graphql", controllers.GraphQl).Methods("GET")
+	router.HandleFunc("/graphql",  middleware.MiddlewareAuth(controllers.GraphQl)).Methods("GET")
 
 	//Read does not need protection
 	router.HandleFunc("/read", controllers.Read).Methods("GET")

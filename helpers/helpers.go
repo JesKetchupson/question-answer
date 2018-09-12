@@ -8,16 +8,16 @@ import (
 	"github.com/jinzhu/gorm"
 	"net/http"
 	"time"
-)
+	"os"
+	)
 
-func Decode(tokenString string) User {
+func Decode(tokenString string) (User, error) {
 	token, errparse := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
 		}
 		// []byte("my_secret_key")
-		return []byte("b093be924f51ddfe2dcbd5eb69aa195b14dca0ad2325e9b3d56ded6c7c519e2c"), nil
+		return []byte(os.Getenv("Secret")), nil
 	})
 
 	if errparse != nil {
@@ -31,7 +31,7 @@ func Decode(tokenString string) User {
 			Password: claims["password"].(string),
 		}
 	}
-	return user
+	return user, nil
 }
 
 func GetDb() (*gorm.DB, error) {
@@ -58,4 +58,32 @@ func GetDecodedJson(r *http.Request) (t User) {
 	decoder := json.NewDecoder(r.Body)
 	decoder.Decode(&t)
 	return
+}
+
+type Configuration struct {
+	Port              int
+	Secret            string
+}
+
+func InitEnvVal(filename string)  {
+
+	file, err := os.Open(filename)
+	if err != nil {
+		panic(err)
+	}
+
+	fi,_ := os.Stat(filename)
+	b := make([]byte,fi.Size())
+	file.Read(b)
+
+	c:=make(map[string]string)
+
+	err = json.Unmarshal(b,&c)
+	for key,val:=range c{
+	os.Setenv(key,val)
+	}
+
+	if err != nil {
+		panic(err)
+	}
 }

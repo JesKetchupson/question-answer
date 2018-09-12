@@ -3,7 +3,7 @@ package middleware
 import (
 	"awesomeProject/api/helpers"
 	"net/http"
-)
+	)
 
 func MiddlewareAuth(h http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -19,12 +19,18 @@ func MiddlewareAuth(h http.HandlerFunc) http.HandlerFunc {
 }
 
 func CheckToken(r *http.Request) bool {
-	sec, _ := r.Cookie("AccessToken")
-	user := helpers.Decode(sec.Value)
-	var db, _ = helpers.GetDb()
-	isTrue := db.Where("email=?", user.Email).Where("password=?", user.Password)
-	if isTrue.RecordNotFound() {
+	sec, err := r.Cookie("AccessToken")
+
+	if err == nil{
+	user,_ := helpers.Decode(sec.Value)
+		var db, _ = helpers.GetDb()
+		isTrue := db.Where("email=?", user.Email).Where("password=?", user.Password)
+		if isTrue.RecordNotFound() {
+			return false
+		}
+		return true
+	}else {
 		return false
 	}
-	return true
+
 }
