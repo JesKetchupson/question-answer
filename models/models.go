@@ -19,10 +19,10 @@ type Answer struct {
 	ID         uint       `gorm:"primary_key" json:"id"`
 	User       User       `json:"-" gorm:"unique;foreignkey:UserID"`
 	UserID     uint       `gorm:"type:INT UNSIGNED REFERENCES users(id) ON DELETE RESTRICT ON UPDATE RESTRICT" json:"user_id"`
-	Objects    []Object   `gorm:"foreignkey:QuestionID" json:"-"`
-	ObjectID   uint       `gorm:"type:INT UNSIGNED REFERENCES objects(id) ON DELETE RESTRICT ON UPDATE RESTRICT" json:"object_id"`
-	Questions  []Question `gorm:"foreignkey:QuestionID" json:"-"`
-	QuestionID uint       `gorm:"type:INT UNSIGNED REFERENCES questions(id) ON DELETE RESTRICT ON UPDATE RESTRICT" json:"question_id"`
+	Objects    []Object   `gorm:"foreignkey:QuestionID" json:"object"`
+	ObjectID   uint     `gorm:"type:INT UNSIGNED REFERENCES objects(id) ON DELETE RESTRICT ON UPDATE RESTRICT" json:"object_id"`
+	Questions  []Question `gorm:"foreignkey:QuestionID" json:"question"`
+	QuestionID uint     `gorm:"type:INT UNSIGNED REFERENCES questions(id) ON DELETE RESTRICT ON UPDATE RESTRICT" json:"question_id"`
 }
 
 type Question struct {
