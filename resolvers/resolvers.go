@@ -1,5 +1,6 @@
 package resolvers
-
+//Unused package
+//
 import (
 	"awesomeProject/api/helpers"
 	. "awesomeProject/api/models"

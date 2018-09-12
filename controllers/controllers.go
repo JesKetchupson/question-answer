@@ -9,9 +9,9 @@ import (
 	"github.com/graphql-go/graphql"
 	"net/http"
 	"github.com/gorilla/websocket"
-)
+	)
 
-var db, err = helpers.GetDb()
+var db, _ = helpers.GetDb()
 
 func Registration(w http.ResponseWriter, r *http.Request) {
 	req := helpers.GetDecodedJson(r)
@@ -35,11 +35,10 @@ func Login(w http.ResponseWriter, r *http.Request) {
 
 		req.GenerateRefresh(req.Email, req.Password)
 
-		json.NewEncoder(w).Encode(req)
-	}
-
-	if err != nil {
-		w.Write([]byte("Something bad happens"))
+		err := json.NewEncoder(w).Encode(req)
+		if err != nil {
+			w.Write([]byte("Something bad happens"))
+		}
 	}
 }
 func Read(w http.ResponseWriter, r *http.Request) {
@@ -195,7 +194,6 @@ var queryType = graphql.NewObject(
 					var ListQuestions []Question
 					db.Find(&ListQuestions)
 					var i = 0
-
 					for _, QuestionA := range ListQuestions {
 						for _, Answer := range Answers {
 							if QuestionA.ID != Answer.QuestionID {
@@ -207,8 +205,7 @@ var queryType = graphql.NewObject(
 						}
 						i = 0
 					}
-
-					return nil, nil
+					return nil, errors.New("no questions for you")
 				},
 			},
 		},
