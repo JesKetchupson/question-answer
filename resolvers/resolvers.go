@@ -2,8 +2,8 @@ package resolvers
 //Unused package
 //
 import (
-	"awesomeProject/api/helpers"
-	. "awesomeProject/api/models"
+	"holy-war-web/api/helpers"
+	. "holy-war-web/api/models"
 	"github.com/graphql-go/graphql"
 )
 

@@ -2,12 +2,11 @@ package main
 
 import (
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
-
-	"awesomeProject/api/helpers"
-	"net/http"
+	"holy-war-web/api/helpers"
+	"holy-war-web/api/router"
 	"github.com/gorilla/handlers"
+	"net/http"
 	"os"
-	"awesomeProject/api/router"
 )
 
 //имя фамилия, отображаемое имя, аффка
@@ -15,19 +14,21 @@ import (
 //Модель вопросов Question{A,B}
 var db, err = helpers.GetDb()
 
+func init() {
+	helpers.InitEnvVal("env")
+	//database.Migrate()
+	//database.Seed()
+}
+
 func main() {
 	//close DB after Main function's end
 	if err != nil {
 		panic(err)
 	}
 
-	helpers.InitEnvVal("env")
+	println("Server started on port 8080")
 
-	//database.Migrate()
-	//database.Seed()
-	//println("Server started on port 8080")
-
-	http.ListenAndServe(":8080", handlers.LoggingHandler(os.Stdout, router.Router()))
+	http.ListenAndServe(":"+os.Getenv("Port"), handlers.LoggingHandler(os.Stdout, router.Router()))
 
 	defer db.Close()
 }

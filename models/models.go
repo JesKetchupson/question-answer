@@ -2,6 +2,7 @@ package models
 
 import (
 	"github.com/dgrijalva/jwt-go"
+	"os"
 	"time"
 )
 
@@ -20,9 +21,9 @@ type Answer struct {
 	User       User       `json:"-" gorm:"unique;foreignkey:UserID"`
 	UserID     uint       `gorm:"type:INT UNSIGNED REFERENCES users(id) ON DELETE RESTRICT ON UPDATE RESTRICT" json:"user_id"`
 	Objects    []Object   `gorm:"foreignkey:QuestionID" json:"object"`
-	ObjectID   uint     `gorm:"type:INT UNSIGNED REFERENCES objects(id) ON DELETE RESTRICT ON UPDATE RESTRICT" json:"object_id"`
+	ObjectID   uint       `gorm:"type:INT UNSIGNED REFERENCES objects(id) ON DELETE RESTRICT ON UPDATE RESTRICT" json:"object_id"`
 	Questions  []Question `gorm:"foreignkey:QuestionID" json:"question"`
-	QuestionID uint     `gorm:"type:INT UNSIGNED REFERENCES questions(id) ON DELETE RESTRICT ON UPDATE RESTRICT" json:"question_id"`
+	QuestionID uint       `gorm:"type:INT UNSIGNED REFERENCES questions(id) ON DELETE RESTRICT ON UPDATE RESTRICT" json:"question_id"`
 }
 
 type Question struct {
@@ -56,8 +57,10 @@ func (user *User) GenerateRefresh(email string, password string) {
 		"exp":      time.Now().Add(time.Minute * 20).Unix(),
 	})
 
-	tokenString, err := signer.SignedString([]byte("b093be924f51ddfe2dcbd5eb69aa195b14dca0ad2325e9b3d56ded6c7c519e2c"))
-	println(tokenString, err)
+	tokenString, err := signer.SignedString([]byte(os.Getenv("Secret")))
+	if err != nil {
+		panic(err)
+	}
 	user.RefreshToken = tokenString
 }
 func (user *User) GenerateAccess(email string, password string) {
@@ -67,8 +70,10 @@ func (user *User) GenerateAccess(email string, password string) {
 		"iss":      "admin",
 		"exp":      time.Now().Add(time.Minute * 20).Unix(),
 	})
-	tokenString, err := signer.SignedString([]byte("b093be924f51ddfe2dcbd5eb69aa195b14dca0ad2325e9b3d56ded6c7c519e2c"))
-	println(tokenString, err)
+	tokenString, err := signer.SignedString([]byte(os.Getenv("Secret")))
+	if err != nil {
+		panic(err)
+	}
 	user.AccessToken = tokenString
 
 }

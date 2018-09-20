@@ -1,15 +1,15 @@
 package helpers
 
 import (
-	. "awesomeProject/api/models"
+	. "holy-war-web/api/models"
 	"encoding/json"
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/jinzhu/gorm"
 	"net/http"
-	"time"
 	"os"
-	)
+	"time"
+)
 
 func Decode(tokenString string) (User, error) {
 	token, errparse := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
@@ -60,27 +60,20 @@ func GetDecodedJson(r *http.Request) (t User) {
 	return
 }
 
-type Configuration struct {
-	Port              int
-	Secret            string
-}
-
-func InitEnvVal(filename string)  {
-
+func InitEnvVal(filename string) {
 	file, err := os.Open(filename)
 	if err != nil {
 		panic(err)
 	}
-
-	fi,_ := os.Stat(filename)
-	b := make([]byte,fi.Size())
+	fi, _ := os.Stat(filename)
+	b := make([]byte, fi.Size())
 	file.Read(b)
 
-	c:=make(map[string]string)
+	c := make(map[string]string)
 
-	err = json.Unmarshal(b,&c)
-	for key,val:=range c{
-	os.Setenv(key,val)
+	err = json.Unmarshal(b, &c)
+	for key, val := range c {
+		os.Setenv(key, val)
 	}
 
 	if err != nil {

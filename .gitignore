@@ -1,3 +1,4 @@
 main
 database.db
 vendor/
+env

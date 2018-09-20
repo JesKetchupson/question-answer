@@ -1,8 +1,8 @@
 package database
 
 import (
-	"awesomeProject/api/helpers"
-	. "awesomeProject/api/models"
+	"holy-war-web/api/helpers"
+	. "holy-war-web/api/models"
 	"strconv"
 )
 

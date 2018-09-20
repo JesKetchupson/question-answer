@@ -1,11 +1,11 @@
 package middleware
 
 import (
-	"awesomeProject/api/helpers"
+	"holy-war-web/api/helpers"
 	"net/http"
 	)
 
-func MiddlewareAuth(h http.HandlerFunc) http.HandlerFunc {
+func Auth(h http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		//Conditions before
 		if CheckToken(r) == false {

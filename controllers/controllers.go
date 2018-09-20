@@ -1,15 +1,15 @@
 package controllers
 
 import (
-	"awesomeProject/api/helpers"
-	. "awesomeProject/api/models"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/graphql-go/graphql"
-	"net/http"
 	"github.com/gorilla/websocket"
-	)
+	"github.com/graphql-go/graphql"
+	"holy-war-web/api/helpers"
+	. "holy-war-web/api/models"
+	"net/http"
+)
 
 var db, _ = helpers.GetDb()
 
@@ -73,32 +73,29 @@ func Del(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-var questionType = graphql.NewObject(
-	graphql.ObjectConfig{
-		Name: "Question",
-		Fields: graphql.Fields{
-			"id": &graphql.Field{
-				Type: graphql.Int,
-			},
-			"first_object_id": &graphql.Field{
-				Type: graphql.Int,
-			},
-			"second_object_id": &graphql.Field{
-				Type: graphql.Int,
-			},
-			"first_object": &graphql.Field{
-				Type: object,
-			},
-			"second_object": &graphql.Field{
-				Type: object,
-			},
-			"comment": &graphql.Field{
-				Type: graphql.String,
-			},
+var questionType = graphql.NewObject(graphql.ObjectConfig{
+	Name: "Question",
+	Fields: graphql.Fields{
+		"id": &graphql.Field{
+			Type: graphql.Int,
+		},
+		"first_object_id": &graphql.Field{
+			Type: graphql.Int,
+		},
+		"second_object_id": &graphql.Field{
+			Type: graphql.Int,
+		},
+		"first_object": &graphql.Field{
+			Type: object,
+		},
+		"second_object": &graphql.Field{
+			Type: object,
+		},
+		"comment": &graphql.Field{
+			Type: graphql.String,
 		},
 	},
-)
-
+})
 var object = graphql.NewObject(graphql.ObjectConfig{
 	Name: "Object",
 	Fields: graphql.Fields{
@@ -119,7 +116,6 @@ var object = graphql.NewObject(graphql.ObjectConfig{
 		},
 	},
 })
-
 var category = graphql.NewObject(graphql.ObjectConfig{
 	Name: "Category",
 	Fields: graphql.Fields{
@@ -131,85 +127,82 @@ var category = graphql.NewObject(graphql.ObjectConfig{
 		},
 	},
 })
-
 var questions []Question
-
 //var db, err =helpers.GetDb()
-var queryType = graphql.NewObject(
-	graphql.ObjectConfig{
-		Name: "Query",
-		Fields: graphql.Fields{
-			/* Get (read) single product by id
-			   http://localhost:8080/graphql?query={questions(id:1){first_object,second_object}}
-			*/
-			"questions": &graphql.Field{
-				Type:        questionType,
-				Description: "Get question by id",
-				Args: graphql.FieldConfigArgument{
-					"id": &graphql.ArgumentConfig{
-						Type: graphql.Int,
-					},
-				},
-				Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-					id, ok := p.Args["id"]
-					if ok {
-						ad := db.Find(&Question{ID: uint(id.(int))}).Value.(*Question)
-
-						a2 := db.Find(&Object{ID: ad.SecondObjectID}).Value.(*Object)
-						b2 := db.Find(&Category{ID: a2.CategoryID}).Value.(*Category)
-						a2.Category = *b2
-						ad.FirstObject = *a2
-
-						so := db.Find(&Object{ID: ad.SecondObjectID}).Value.(*Object)
-						cat := db.Find(&Category{ID: so.CategoryID}).Value.(*Category)
-						so.Category = *cat
-						ad.SecondObject = *so
-						return ad, nil
-					}
-					return nil, errors.New("not found")
+var queryType = graphql.NewObject(graphql.ObjectConfig{
+	Name: "Query",
+	Fields: graphql.Fields{
+		/* Get (read) single product by id
+		   http://localhost:8080/graphql?query={questions(id:1){first_object,second_object}}
+		*/
+		"questions": &graphql.Field{
+			Type:        questionType,
+			Description: "Get question by id",
+			Args: graphql.FieldConfigArgument{
+				"id": &graphql.ArgumentConfig{
+					Type: graphql.Int,
 				},
 			},
-			/* Get (read) product list
-			   http://localhost:8080/graphql?query={list{id}}
-			*/
-			"list": &graphql.Field{
-				Type:        graphql.NewList(questionType),
-				Description: "Get questions list",
-				Resolve: func(params graphql.ResolveParams) (interface{}, error) {
-					return questions, nil
-				},
-			},
-			"getRandomQuestion": &graphql.Field{
-				Type:        questionType,
-				Description: "Get random question for user",
-				Args: graphql.FieldConfigArgument{
-					"user_id": &graphql.ArgumentConfig{
-						Type: graphql.Int,
-					},
-				},
-				Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-					UserID, _ := p.Args["user_id"]
-					var Answers []Answer
-					db.Where("user_id=?", UserID).Find(&Answers)
-					var ListQuestions []Question
-					db.Find(&ListQuestions)
-					var i = 0
-					for _, QuestionA := range ListQuestions {
-						for _, Answer := range Answers {
-							if QuestionA.ID != Answer.QuestionID {
-								i++
-							}
-							if i == len(Answers) {
-								return QuestionA, nil
-							}
-						}
-						i = 0
-					}
-					return nil, errors.New("no questions for you")
-				},
+			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+				id, ok := p.Args["id"]
+				if ok {
+					ad := db.Find(&Question{ID: uint(id.(int))}).Value.(*Question)
+
+					a2 := db.Find(&Object{ID: ad.SecondObjectID}).Value.(*Object)
+					b2 := db.Find(&Category{ID: a2.CategoryID}).Value.(*Category)
+					a2.Category = *b2
+					ad.FirstObject = *a2
+
+					so := db.Find(&Object{ID: ad.SecondObjectID}).Value.(*Object)
+					cat := db.Find(&Category{ID: so.CategoryID}).Value.(*Category)
+					so.Category = *cat
+					ad.SecondObject = *so
+					return ad, nil
+				}
+				return nil, errors.New("not found")
 			},
 		},
-	})
+		/* Get (read) product list
+		   http://localhost:8080/graphql?query={list{id}}
+		*/
+		"list": &graphql.Field{
+			Type:        graphql.NewList(questionType),
+			Description: "Get questions list",
+			Resolve: func(params graphql.ResolveParams) (interface{}, error) {
+				return questions, nil
+			},
+		},
+		"getRandomQuestion": &graphql.Field{
+			Type:        questionType,
+			Description: "Get random question for user",
+			Args: graphql.FieldConfigArgument{
+				"user_id": &graphql.ArgumentConfig{
+					Type: graphql.Int,
+				},
+			},
+			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+				UserID, _ := p.Args["user_id"]
+				var Answers []Answer
+				db.Where("user_id=?", UserID).Find(&Answers)
+				var ListQuestions []Question
+				db.Find(&ListQuestions)
+				var i = 0
+				for _, QuestionA := range ListQuestions {
+					for _, Answer := range Answers {
+						if QuestionA.ID != Answer.QuestionID {
+							i++
+						}
+						if i == len(Answers) {
+							return QuestionA, nil
+						}
+					}
+					i = 0
+				}
+				return nil, errors.New("no questions for you")
+			},
+		},
+	},
+})
 
 var mutationType = graphql.NewObject(graphql.ObjectConfig{
 	Name: "Mutation",
